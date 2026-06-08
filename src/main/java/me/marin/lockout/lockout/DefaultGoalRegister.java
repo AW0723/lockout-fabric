@@ -77,6 +77,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(GoalType.WEAR_LEATHER_ARMOR, WearLeatherArmorGoal.class);
         INSTANCE.register(GoalType.WEAR_GOLDEN_ARMOR, WearGoldenArmorGoal.class);
         INSTANCE.register(GoalType.WEAR_DIAMOND_ARMOR, WearDiamondArmorGoal.class);
+        INSTANCE.register(GoalType.WEAR_COPPER_ARMOR, WearCopperArmorGoal.class);
         INSTANCE.register(GoalType.WEAR_IRON_ARMOR, WearIronArmorGoal.class);
         INSTANCE.register(GoalType.WEAR_CHAIN_ARMOR_PIECE, WearChainArmorPieceGoal.class,
                 GoalRequirements.VILLAGE);
