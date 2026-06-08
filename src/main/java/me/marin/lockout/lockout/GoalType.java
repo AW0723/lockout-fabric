@@ -14,6 +14,7 @@ public class GoalType {
     public static final String OBTAIN_STONE_TOOLS = "OBTAIN_STONE_TOOLS";
     public static final String OBTAIN_GOLDEN_TOOLS = "OBTAIN_GOLDEN_TOOLS";
     public static final String OBTAIN_DIAMOND_TOOLS = "OBTAIN_DIAMOND_TOOLS";
+    public static final String OBTAIN_COPPER_TOOLS = "OBTAIN_COPPER_TOOLS";
     public static final String FILL_ARMOR_STAND = "FILL_ARMOR_STAND";
     public static final String WEAR_CARVED_PUMPKIN_FOR_5_MINUTES = "WEAR_CARVED_PUMPKIN_FOR_5_MINUTES";
     public static final String WEAR_GOLDEN_ARMOR = "WEAR_GOLDEN_ARMOR";

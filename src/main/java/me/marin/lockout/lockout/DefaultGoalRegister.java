@@ -60,6 +60,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(GoalType.OBTAIN_IRON_TOOLS, ObtainIronToolsGoal.class);
         INSTANCE.register(GoalType.OBTAIN_GOLDEN_TOOLS, ObtainGoldenToolsGoal.class);
         INSTANCE.register(GoalType.OBTAIN_DIAMOND_TOOLS, ObtainDiamondToolsGoal.class);
+        INSTANCE.register(GoalType.OBTAIN_COPPER_TOOLS, ObtainCopperToolsGoal.class);
         INSTANCE.register(GoalType.MINE_DIAMOND_ORE, MineDiamondOreGoal.class);
         INSTANCE.register(GoalType.MINE_EMERALD_ORE, MineEmeraldOreGoal.class, new GoalRequirements.Builder()
                 .biomes(List.of(JAGGED_PEAKS, FROZEN_PEAKS, STONY_PEAKS, GROVE, SNOWY_SLOPES))
