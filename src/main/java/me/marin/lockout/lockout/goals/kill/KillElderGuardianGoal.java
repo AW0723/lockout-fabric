@@ -3,9 +3,9 @@ package me.marin.lockout.lockout.goals.kill;
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.interfaces.KillMobGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.Identifier;
 
 public class KillElderGuardianGoal extends KillMobGoal implements TextureProvider {
 
@@ -23,7 +23,7 @@ public class KillElderGuardianGoal extends KillMobGoal implements TextureProvide
         return null;
     }
 
-    private static final Identifier TEXTURE = Identifier.of(Constants.NAMESPACE, "textures/custom/kill/kill_elder_guardian.png");
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/kill/kill_elder_guardian.png");
     @Override
     public Identifier getTextureIdentifier() {
         return TEXTURE;

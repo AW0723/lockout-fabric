@@ -1,7 +1,5 @@
 package me.marin.lockout.client;
 
-import lombok.Getter;
-import lombok.experimental.Accessors;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.GoalRegistry;
 import me.marin.lockout.lockout.GoalType;
@@ -16,9 +14,9 @@ import static me.marin.lockout.Constants.MIN_BOARD_SIZE;
 
 public class LockoutBoard {
 
-    @Accessors(fluent = true)
-    @Getter
     private final int size;
+
+    public int size() { return size; }
 
     private final List<Goal> goals = new ArrayList<>();
 

@@ -1,8 +1,5 @@
 package me.marin.lockout.client.gui;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.GoalRegistry;
 import oshi.util.tuples.Pair;
@@ -24,21 +21,20 @@ public class BoardBuilderData {
 
     private final List<Goal> goals;
 
-    @Getter @Setter
     private String title = "";
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-    /**
-     * Index of the goal that is currently being modified (searching goal or editing data)
-     */
-    @Setter @Getter
     private Integer modifyingIdx = null;
+    public Integer getModifyingIdx() { return modifyingIdx; }
+    public void setModifyingIdx(Integer modifyingIdx) { this.modifyingIdx = modifyingIdx; }
 
-    @Setter @Getter
     private String search = "";
+    public String getSearch() { return search; }
+    public void setSearch(String search) { this.search = search; }
 
-    @Accessors(fluent = true) // size() instead of getSize()
-    @Getter
     private int size = 5;
+    public int size() { return size; }
 
     private BoardBuilderData() {
         goals = new ArrayList<>(Collections.nCopies(size * size, null));

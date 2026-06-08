@@ -3,8 +3,6 @@ package me.marin.lockout;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
-import lombok.Getter;
-
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,8 +11,9 @@ public class LockoutConfig {
 
     private static final Path CONFIG_PATH = new File("./config/lockout.json").toPath();
 
-    @Getter
     private static LockoutConfig instance;
+
+    public static LockoutConfig getInstance() { return instance; }
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 

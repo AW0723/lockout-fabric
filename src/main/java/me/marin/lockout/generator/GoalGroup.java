@@ -1,7 +1,5 @@
 package me.marin.lockout.generator;
 
-import lombok.Getter;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -117,7 +115,7 @@ public class GoalGroup {
             EAT_PUMPKIN_PIE, EAT_COOKIE, GET_WHAT_A_DEAL_ADVANCEMENT, OBTAIN_BELL, DIE_BY_IRON_GOLEM, EAT_RABBIT_STEW,
             WEAR_CHAIN_ARMOR_PIECE
     ), 3);
-    public static final GoalGroup MONUMENT = new GoalGroup(List.of(
+    public static final GoalGroup OCEAN_MONUMENT = new GoalGroup(List.of(
             GET_MINING_FATIGUE_STATUS_EFFECT, KILL_ELDER_GUARDIAN, KILL_GUARDIAN, OBTAIN_SPONGE, DIE_BY_MAGIC
     ), 1);
     public static final GoalGroup REDSTONE = new GoalGroup(List.of(
@@ -204,7 +202,7 @@ public class GoalGroup {
         GOAL_GROUPS.add(ADVANCEMENT);
         GOAL_GROUPS.add(X_ADVANCEMENTS);
         GOAL_GROUPS.add(VILLAGE);
-        GOAL_GROUPS.add(MONUMENT);
+        GOAL_GROUPS.add(OCEAN_MONUMENT);
         GOAL_GROUPS.add(REDSTONE);
         GOAL_GROUPS.add(TNT);
         GOAL_GROUPS.add(STRIDER);
@@ -221,10 +219,11 @@ public class GoalGroup {
     }
 
 
-    @Getter
     private final List<String> goals;
-    @Getter
     private final int limit;
+
+    public List<String> getGoals() { return goals; }
+    public int getLimit() { return limit; }
     private final List<String> requirePredecessor = new ArrayList<>();
 
     private GoalGroup(List<String> goals, int limit) {

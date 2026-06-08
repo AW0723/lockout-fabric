@@ -6,10 +6,10 @@ import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.interfaces.BreedAnimalGoal;
 import me.marin.lockout.lockout.interfaces.BreedUniqueAnimalsGoal;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.advancement.criterion.BredAnimalsCriterion;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.PassiveEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.advancements.criterion.BredAnimalsTrigger;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,11 +18,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.LinkedHashSet;
 
-@Mixin(BredAnimalsCriterion.class)
+@Mixin(BredAnimalsTrigger.class)
 public class BredAnimalsCriterionMixin {
 
     @Inject(method = "trigger", at = @At("HEAD"))
-    public void onBreedAnimal(ServerPlayerEntity player, AnimalEntity parent, AnimalEntity partner, @Nullable PassiveEntity child, CallbackInfo ci) {
+    public void onBreedAnimal(ServerPlayer player, Animal parent, Animal partner, @Nullable AgeableMob child, CallbackInfo ci) {
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;
 
@@ -35,7 +35,7 @@ public class BredAnimalsCriterionMixin {
                     lockout.completeGoal(breedAnimalGoal, player);
                 }
             } else if (goal instanceof BreedUniqueAnimalsGoal breedUniqueAnimalsGoal) {
-                LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(player.getUuid());
+                LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(player.getUUID());
                 lockout.bredAnimalTypes.computeIfAbsent(team, t -> new LinkedHashSet<>());
                 lockout.bredAnimalTypes.get(team).add(parent.getType());
                 int size = lockout.bredAnimalTypes.get(team).size();

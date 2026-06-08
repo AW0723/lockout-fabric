@@ -7,13 +7,13 @@ import me.marin.lockout.lockout.interfaces.AdvancementGoal;
 import me.marin.lockout.lockout.interfaces.GetUniqueAdvancementsGoal;
 import me.marin.lockout.lockout.interfaces.VisitBiomeGoal;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.advancement.AdvancementDisplay;
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.advancement.PlayerAdvancementTracker;
-import net.minecraft.server.PlayerManager;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.advancements.DisplayInfo;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.server.PlayerAdvancements;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,28 +24,28 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 
-@Mixin(PlayerAdvancementTracker.class)
+@Mixin(PlayerAdvancements.class)
 public abstract class PlayerAdvancementTrackerMixin {
 
     @Shadow
-    private ServerPlayerEntity owner;
+    private ServerPlayer player;
 
-    @Redirect(method = "method_53637", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/text/Text;Z)V") )
-    public void onBroadcastInChat(PlayerManager instance, Text message, boolean overlay) {
+    @Redirect(method = "lambda$award$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V") )
+    public void onBroadcastInChat(PlayerList instance, Component message, boolean overlay) {
         Lockout lockout = LockoutServer.lockout;
 
         // Prevent spectator advancements from showing in chat
-        if (!Lockout.isLockoutRunning(lockout) || lockout.isLockoutPlayer(owner.getUuid())) {
-            instance.broadcast(message, overlay);
+        if (!Lockout.isLockoutRunning(lockout) || lockout.isLockoutPlayer(player.getUUID())) {
+            instance.broadcastSystemMessage(message, overlay);
         }
     }
 
-    @Inject(method = "grantCriterion", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancement/Advancement;rewards()Lnet/minecraft/advancement/AdvancementRewards;") )
-    public void onGrantCriterion(AdvancementEntry advancement, String criterionName, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "award", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/Advancement;rewards()Lnet/minecraft/advancements/AdvancementRewards;") )
+    public void onGrantCriterion(AdvancementHolder advancement, String criterionName, CallbackInfoReturnable<Boolean> cir) {
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;
-        if (!lockout.isLockoutPlayer(owner.getUuid())) return;
-        LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(owner.getUuid());
+        if (!lockout.isLockoutPlayer(player.getUUID())) return;
+        LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(player.getUUID());
 
         for (Goal goal : lockout.getBoard().getGoals()) {
             if (goal == null) continue;
@@ -53,11 +53,11 @@ public abstract class PlayerAdvancementTrackerMixin {
 
             if (goal instanceof AdvancementGoal advancementGoal) {
                 if (advancementGoal.getAdvancements().contains(advancement.id())) {
-                    lockout.completeGoal(goal, owner);
+                    lockout.completeGoal(goal, player);
                 }
             }
             if (goal instanceof GetUniqueAdvancementsGoal getUniqueAdvancementsGoal) {
-                Optional<AdvancementDisplay> advancementDisplay = advancement.value().display();
+                Optional<DisplayInfo> advancementDisplay = advancement.value().display();
                 if (advancementDisplay.isPresent()) {
                     getUniqueAdvancementsGoal.getTrackerMap().putIfAbsent(team, new LinkedHashSet<>());
                     getUniqueAdvancementsGoal.getTrackerMap().get(team).add(advancement.id());
@@ -73,14 +73,14 @@ public abstract class PlayerAdvancementTrackerMixin {
         }
     }
 
-    private static final Identifier ADVENTURING_TIME = Identifier.of("minecraft", "adventure/adventuring_time");
-    @Inject(method = "grantCriterion", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancement/AdvancementProgress;isDone()Z", ordinal = 1, shift = At.Shift.BEFORE) )
-    public void onAdvancementProgress(AdvancementEntry advancement, String criterionName, CallbackInfoReturnable<Boolean> cir) {
+    private static final Identifier ADVENTURING_TIME = Identifier.fromNamespaceAndPath("minecraft", "adventure/adventuring_time");
+    @Inject(method = "award", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/AdvancementProgress;isDone()Z", ordinal = 1, shift = At.Shift.BEFORE) )
+    public void onAdvancementProgress(AdvancementHolder advancement, String criterionName, CallbackInfoReturnable<Boolean> cir) {
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;
 
         if (!advancement.id().equals(ADVENTURING_TIME)) return;
-        Identifier biomeId = Identifier.of(criterionName);
+        Identifier biomeId = Identifier.parse(criterionName);
 
         for (Goal goal : lockout.getBoard().getGoals()) {
             if (goal == null) continue;
@@ -88,7 +88,7 @@ public abstract class PlayerAdvancementTrackerMixin {
 
             if (goal instanceof VisitBiomeGoal visitBiomeGoal) {
                 if (visitBiomeGoal.getBiomes().contains(biomeId)) {
-                    lockout.completeGoal(goal, owner);
+                    lockout.completeGoal(goal, player);
                 }
             }
         }

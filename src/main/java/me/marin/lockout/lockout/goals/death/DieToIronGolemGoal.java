@@ -3,8 +3,8 @@ package me.marin.lockout.lockout.goals.death;
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.interfaces.DieToEntityGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;
-import net.minecraft.entity.EntityType;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.resources.Identifier;
 
 public class DieToIronGolemGoal extends DieToEntityGoal implements TextureProvider {
 
@@ -22,7 +22,7 @@ public class DieToIronGolemGoal extends DieToEntityGoal implements TextureProvid
         return EntityType.IRON_GOLEM;
     }
 
-    private static final Identifier TEXTURE = Identifier.of(Constants.NAMESPACE, "textures/custom/death/die_to_golem.png");
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/death/die_to_golem.png");
     @Override
     public Identifier getTextureIdentifier() {
         return TEXTURE;

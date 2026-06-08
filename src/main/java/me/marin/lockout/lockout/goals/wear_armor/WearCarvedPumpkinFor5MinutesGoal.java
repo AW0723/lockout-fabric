@@ -7,13 +7,13 @@ import me.marin.lockout.lockout.interfaces.HasTooltipInfo;
 import me.marin.lockout.lockout.interfaces.WearArmorPieceGoal;
 import me.marin.lockout.mixin.server.PlayerInventoryAccessor;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Formatting;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.ChatFormatting;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,11 +40,11 @@ public class WearCarvedPumpkinFor5MinutesGoal extends WearArmorPieceGoal impleme
     }
 
     @Override
-    public boolean satisfiedBy(PlayerInventory playerInventory) {
-        PlayerEntity player = playerInventory.player;
+    public boolean satisfiedBy(Inventory playerInventory) {
+        Player player = playerInventory.player;
         var map = LockoutServer.lockout.pumpkinWearTime;
 
-        long wornTime = map.getOrDefault(player.getUuid(), 0L);
+        long wornTime = map.getOrDefault(player.getUUID(), 0L);
 
         // TODO: Do better
         var armor = new ArrayList<ItemStack>();
@@ -64,10 +64,10 @@ public class WearCarvedPumpkinFor5MinutesGoal extends WearArmorPieceGoal impleme
 
         if (wearingPumpkin) {
             wornTime += 1;
-            map.put(player.getUuid(), wornTime);
+            map.put(player.getUUID(), wornTime);
 
             if (wornTime % 20 == 0) {
-                ((LockoutTeamServer) LockoutServer.lockout.getPlayerTeam(player.getUuid())).sendTooltipUpdate(this, true);
+                ((LockoutTeamServer) LockoutServer.lockout.getPlayerTeam(player.getUUID())).sendTooltipUpdate(this, true);
             }
 
             return wornTime >= (FIVE_MINUTES_TICKS);
@@ -78,9 +78,9 @@ public class WearCarvedPumpkinFor5MinutesGoal extends WearArmorPieceGoal impleme
 
 
     @Override
-    public List<String> getTooltip(LockoutTeam team, PlayerEntity player) {
+    public List<String> getTooltip(LockoutTeam team, Player player) {
         List<String> tooltip = new ArrayList<>();
-        long timeWorn = Math.min(FIVE_MINUTES_TICKS, LockoutServer.lockout.pumpkinWearTime.getOrDefault(player.getUuid(), 0L));
+        long timeWorn = Math.min(FIVE_MINUTES_TICKS, LockoutServer.lockout.pumpkinWearTime.getOrDefault(player.getUUID(), 0L));
         LockoutTeamServer serverTeam = ((LockoutTeamServer) team);
 
         tooltip.add(" ");
@@ -88,7 +88,7 @@ public class WearCarvedPumpkinFor5MinutesGoal extends WearArmorPieceGoal impleme
         if (serverTeam.getPlayers().size() > 1) {
             tooltip.add(" ");
             for (UUID uuid : ((LockoutTeamServer) team).getPlayers()) {
-                if (!Objects.equals(uuid, player.getUuid())) {
+                if (!Objects.equals(uuid, player.getUUID())) {
                     tooltip.add(serverTeam.getPlayerName(uuid) + ": " + Utility.ticksToTimer(timeWorn));
                 }
             }
@@ -106,7 +106,7 @@ public class WearCarvedPumpkinFor5MinutesGoal extends WearArmorPieceGoal impleme
         for (LockoutTeam team : LockoutServer.lockout.getTeams()) {
             for (UUID uuid : ((LockoutTeamServer) team).getPlayers()) {
                 long timeWorn = Math.min(FIVE_MINUTES_TICKS, LockoutServer.lockout.pumpkinWearTime.getOrDefault(uuid, 0L));
-                tooltip.add(team.getColor() + ((LockoutTeamServer) team).getPlayerName(uuid) + Formatting.RESET + ": " + Utility.ticksToTimer(timeWorn));
+                tooltip.add(team.getColor() + ((LockoutTeamServer) team).getPlayerName(uuid) + ChatFormatting.RESET + ": " + Utility.ticksToTimer(timeWorn));
             }
         }
         tooltip.add(" ");

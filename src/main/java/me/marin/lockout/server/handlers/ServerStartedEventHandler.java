@@ -5,12 +5,12 @@ import me.marin.lockout.generator.GoalRequirements;
 import me.marin.lockout.lockout.GoalRegistry;
 import me.marin.lockout.server.LockoutServer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.DyeColor;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeKeys;
-import net.minecraft.world.gen.structure.Structure;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.levelgen.structure.Structure;
 
 import static me.marin.lockout.server.LockoutServer.*;
 
@@ -36,24 +36,24 @@ public class ServerStartedEventHandler implements ServerLifecycleEvents.ServerSt
             AVAILABLE_DYE_COLORS.add(DyeColor.PINK);
             AVAILABLE_DYE_COLORS.add(DyeColor.PURPLE);
 
-            boolean hasCactus = locateBiome(server, BiomeKeys.DESERT).wasLocated();
-            hasCactus |= locateBiome(server, BiomeKeys.BADLANDS).wasLocated();
-            hasCactus |= locateBiome(server, BiomeKeys.ERODED_BADLANDS).wasLocated();
-            hasCactus |= locateBiome(server, BiomeKeys.WOODED_BADLANDS).wasLocated();
+            boolean hasCactus = locateBiome(server, Biomes.DESERT).wasLocated();
+            hasCactus |= locateBiome(server, Biomes.BADLANDS).wasLocated();
+            hasCactus |= locateBiome(server, Biomes.ERODED_BADLANDS).wasLocated();
+            hasCactus |= locateBiome(server, Biomes.WOODED_BADLANDS).wasLocated();
             if (hasCactus) {
                 AVAILABLE_DYE_COLORS.add(DyeColor.GREEN);
                 AVAILABLE_DYE_COLORS.add(DyeColor.LIME);
                 AVAILABLE_DYE_COLORS.add(DyeColor.CYAN);
             } else {
-                if (locateBiome(server, BiomeKeys.WARM_OCEAN).wasLocated()) {
+                if (locateBiome(server, Biomes.WARM_OCEAN).wasLocated()) {
                     AVAILABLE_DYE_COLORS.add(DyeColor.LIME);
                 }
             }
 
             boolean hasCocoaBeans;
-            hasCocoaBeans  = locateBiome(server, BiomeKeys.JUNGLE).wasLocated();
-            hasCocoaBeans |= locateBiome(server, BiomeKeys.BAMBOO_JUNGLE).wasLocated();
-            hasCocoaBeans |= locateBiome(server, BiomeKeys.JUNGLE).wasLocated();
+            hasCocoaBeans  = locateBiome(server, Biomes.JUNGLE).wasLocated();
+            hasCocoaBeans |= locateBiome(server, Biomes.BAMBOO_JUNGLE).wasLocated();
+            hasCocoaBeans |= locateBiome(server, Biomes.JUNGLE).wasLocated();
             if (hasCocoaBeans) {
                 AVAILABLE_DYE_COLORS.add(DyeColor.BROWN);
             }
@@ -62,11 +62,11 @@ public class ServerStartedEventHandler implements ServerLifecycleEvents.ServerSt
                 GoalRequirements goalRequirements = GoalRegistry.INSTANCE.getGoalGenerator(id);
                 if (goalRequirements == null) continue;
 
-                for (RegistryKey<Biome> biome : goalRequirements.getRequiredBiomes()) {
+                for (ResourceKey<Biome> biome : goalRequirements.getRequiredBiomes()) {
                     locateBiome(server, biome);
                 }
 
-                for (RegistryKey<Structure> structure : goalRequirements.getRequiredStructures()) {
+                for (ResourceKey<Structure> structure : goalRequirements.getRequiredStructures()) {
                     locateStructure(server, structure);
                 }
             }

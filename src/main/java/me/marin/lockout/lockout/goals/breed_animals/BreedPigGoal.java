@@ -3,8 +3,8 @@ package me.marin.lockout.lockout.goals.breed_animals;
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.interfaces.BreedAnimalGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;
-import net.minecraft.entity.EntityType;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.resources.Identifier;
 
 public class BreedPigGoal extends BreedAnimalGoal implements TextureProvider {
 
@@ -22,7 +22,7 @@ public class BreedPigGoal extends BreedAnimalGoal implements TextureProvider {
         return EntityType.PIG;
     }
 
-    private static final Identifier TEXTURE = Identifier.of(Constants.NAMESPACE, "textures/custom/breed/breed_pig.png");
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/breed/breed_pig.png");
     @Override
     public Identifier getTextureIdentifier() {
         return TEXTURE;

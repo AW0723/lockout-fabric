@@ -2,9 +2,9 @@ package me.marin.lockout.lockout.goals.obtain;
 
 import me.marin.lockout.lockout.goals.util.GoalDataConstants;
 import me.marin.lockout.lockout.interfaces.ObtainAllItemsGoal;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.util.DyeColor;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.DyeColor;
 
 import java.util.List;
 

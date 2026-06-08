@@ -44,13 +44,13 @@ import me.marin.lockout.lockout.goals.tame_animal.TameWolfGoal;
 import me.marin.lockout.lockout.goals.util.GoalDataConstants;
 import me.marin.lockout.lockout.goals.wear_armor.*;
 import me.marin.lockout.lockout.goals.workstation.*;
-import net.minecraft.util.DyeColor;
+import net.minecraft.world.item.DyeColor;
 
 import java.util.List;
 
 import static me.marin.lockout.lockout.GoalRegistry.INSTANCE;
-import static net.minecraft.world.biome.BiomeKeys.*;
-import static net.minecraft.world.gen.structure.StructureKeys.*;
+import static net.minecraft.world.level.biome.Biomes.*;
+import static net.minecraft.world.level.levelgen.structure.BuiltinStructures.*;
 
 public class DefaultGoalRegister {
 
@@ -127,12 +127,12 @@ public class DefaultGoalRegister {
         );
         INSTANCE.register(GoalType.KILL_ZOGLIN, KillZoglinGoal.class);
         INSTANCE.register(GoalType.KILL_SILVERFISH, KillSilverfishGoal.class);
-        INSTANCE.register(GoalType.KILL_GUARDIAN, KillGuardianGoal.class, GoalRequirements.MONUMENT);
+        INSTANCE.register(GoalType.KILL_GUARDIAN, KillGuardianGoal.class, GoalRequirements.OCEAN_MONUMENT);
         INSTANCE.register(GoalType.KILL_GHAST, KillGhastGoal.class);
         INSTANCE.register(GoalType.KILL_BAT, KillBatGoal.class);
         INSTANCE.register(GoalType.KILL_SNOW_GOLEM, KillSnowGolemGoal.class);
         INSTANCE.register(GoalType.KILL_SNOW_GOLEM_IN_NETHER, KillSnowGolemInNetherGoal.class);
-        INSTANCE.register(GoalType.KILL_ELDER_GUARDIAN, KillElderGuardianGoal.class, GoalRequirements.MONUMENT);
+        INSTANCE.register(GoalType.KILL_ELDER_GUARDIAN, KillElderGuardianGoal.class, GoalRequirements.OCEAN_MONUMENT);
         INSTANCE.register(GoalType.KILL_COLORED_SHEEP, KillColoredSheepGoal.class, null,
                 GoalDataGenerator.builder().withDye(attainableDyes -> {
                     attainableDyes.remove(DyeColor.WHITE);
@@ -174,7 +174,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(GoalType.OBTAIN_WITHER_SKELETON_SKULL, ObtainWitherSkeletonSkullGoal.class, GoalRequirements.NOT_IN_RANDOM_POOL);
         INSTANCE.register(GoalType.OBTAIN_END_ROD, ObtainEndRodGoal.class);
         INSTANCE.register(GoalType.OBTAIN_SPONGE, ObtainSpongeGoal.class,
-                GoalRequirements.MONUMENT);
+                GoalRequirements.OCEAN_MONUMENT);
         INSTANCE.register(GoalType.OBTAIN_DRAGON_EGG, ObtainDragonEggGoal.class);
         INSTANCE.register(GoalType.OBTAIN_TNT, ObtainTNTGoal.class);
         INSTANCE.register(GoalType.OBTAIN_COBWEB, ObtainCobwebGoal.class);
@@ -264,7 +264,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(GoalType.GET_JUMP_BOOST_STATUS_EFFECT, GetJumpBoostStatusEffectGoal.class);
         INSTANCE.register(GoalType.GET_LEVITATION_STATUS_EFFECT, GetLevitationStatusEffectGoal.class, GoalRequirements.NOT_IN_RANDOM_POOL);
         INSTANCE.register(GoalType.GET_MINING_FATIGUE_STATUS_EFFECT, GetMiningFatigueStatusEffectGoal.class,
-                GoalRequirements.MONUMENT);
+                GoalRequirements.OCEAN_MONUMENT);
         INSTANCE.register(GoalType.GET_NAUSEA_STATUS_EFFECT, GetNauseaStatusEffectGoal.class, new GoalRequirements.Builder()
                 .biomes(List.of(WARM_OCEAN, DEEP_LUKEWARM_OCEAN, LUKEWARM_OCEAN))
                 .build()
@@ -290,7 +290,7 @@ public class DefaultGoalRegister {
                 .biomes(List.of(SNOWY_PLAINS, ICE_SPIKES, FROZEN_OCEAN, DEEP_FROZEN_OCEAN))
                 .build()
         );
-        INSTANCE.register(GoalType.DIE_BY_MAGIC, DieByMagicGoal.class, GoalRequirements.MONUMENT);
+        INSTANCE.register(GoalType.DIE_BY_MAGIC, DieByMagicGoal.class, GoalRequirements.OCEAN_MONUMENT);
         INSTANCE.register(GoalType.DIE_BY_TNT_MINECART, DieToTNTMinecartGoal.class);
         INSTANCE.register(GoalType.GET_A_TERRIBLE_FORTRESS_ADVANCEMENT, GetATerribleFortressAdvancementGoal.class, GoalRequirements.NOT_IN_RANDOM_POOL);
         INSTANCE.register(GoalType.GET_THE_CITY_AT_THE_END_OF_THE_GAME_ADVANCEMENT, GetCityAtTheEndOfTheGameAdvancementGoal.class, GoalRequirements.NOT_IN_RANDOM_POOL);
@@ -380,7 +380,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(GoalType.FILL_CAMPFIRE, FillCampfireWithFoodGoal.class);
         INSTANCE.register(GoalType.PUT_FLOWER_IN_POT, PutFlowerInPotGoal.class);
         INSTANCE.register(GoalType.KILL_ALL_RAID_MOBS, KillAllRaidMobsGoal.class, new GoalRequirements.Builder()
-                .structures(List.of(PILLAGER_OUTPOST, MANSION))
+                .structures(List.of(PILLAGER_OUTPOST, WOODLAND_MANSION))
                 .build()
         );
         INSTANCE.register(GoalType.FILL_CHISELED_BOOKSHELF, FillChiseledBookshelfGoal.class);

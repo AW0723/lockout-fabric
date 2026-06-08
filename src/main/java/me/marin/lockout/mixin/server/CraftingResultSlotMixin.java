@@ -4,16 +4,15 @@ import me.marin.lockout.Lockout;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.goals.have_more.HaveMostUniqueCraftsGoal;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.CraftingScreenHandler;
-import net.minecraft.screen.PlayerScreenHandler;
-import net.minecraft.screen.slot.CraftingResultSlot;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.CraftingMenu;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.ResultSlot;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,29 +24,29 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@Mixin(CraftingResultSlot.class)
+@Mixin(ResultSlot.class)
 public class CraftingResultSlotMixin {
 
     @Shadow @Final
-    private PlayerEntity player;
+    private Player player;
 
     @Shadow
-    private int amount;
+    private int removeCount;
 
-    @Inject(method = "onCrafted(Lnet/minecraft/item/ItemStack;)V", at = @At("HEAD"))
+    @Inject(method = "checkTakeAchievements", at = @At("HEAD"))
     public void onCraft(ItemStack stack, CallbackInfo ci) {
-        if (player.getWorld().isClient) return;
+        if (player.level().isClientSide) return;
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;
 
-        if (amount < 0 || stack.isEmpty()) {
+        if (removeCount < 0 || stack.isEmpty()) {
             return;
         }
 
-        if (!(player.currentScreenHandler instanceof CraftingScreenHandler || player.currentScreenHandler instanceof PlayerScreenHandler)) return;
+        if (!(player.containerMenu instanceof CraftingMenu || player.containerMenu instanceof InventoryMenu)) return;
 
-        lockout.uniqueCrafts.putIfAbsent(player.getUuid(), new HashSet<>());
-        Set<Item> crafts = lockout.uniqueCrafts.get(player.getUuid());
+        lockout.uniqueCrafts.putIfAbsent(player.getUUID(), new HashSet<>());
+        Set<Item> crafts = lockout.uniqueCrafts.get(player.getUUID());
         boolean addedNew = crafts.add(stack.getItem());
 
         if (!addedNew) return;
@@ -56,18 +55,18 @@ public class CraftingResultSlotMixin {
             if (goal == null) continue;
 
             if (goal instanceof HaveMostUniqueCraftsGoal) {
-                player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE.value(), SoundCategory.BLOCKS, 2, 2);
+                player.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
                 if (crafts.size() % 5 == 0) {
-                    player.sendMessage(Text.of(Formatting.GRAY + "" + Formatting.ITALIC + "You have crafted " + crafts.size() + " unique items."), false);
+                    player.sendSystemMessage(Component.literal(ChatFormatting.GRAY + "" + ChatFormatting.ITALIC + "You have crafted " + crafts.size() + " unique items."));
                 }
-                player.sendMessage(Text.of("Unique crafts: " + crafts.size()), true);
+                player.sendOverlayMessage(Component.literal("Unique crafts: " + crafts.size()));
 
                 if (crafts.size() > lockout.mostUniqueCrafts) {
-                    if (!Objects.equals(lockout.mostUniqueCraftsPlayer, player.getUuid())) {
-                        lockout.updateGoalCompletion(goal, player.getUuid());
+                    if (!Objects.equals(lockout.mostUniqueCraftsPlayer, player.getUUID())) {
+                        lockout.updateGoalCompletion(goal, player.getUUID());
                     }
 
-                    lockout.mostUniqueCraftsPlayer = player.getUuid();
+                    lockout.mostUniqueCraftsPlayer = player.getUUID();
                     lockout.mostUniqueCrafts = crafts.size();
                 }
             }

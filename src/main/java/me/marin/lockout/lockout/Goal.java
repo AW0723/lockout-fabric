@@ -1,25 +1,25 @@
 package me.marin.lockout.lockout;
 
-import lombok.Getter;
 import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.client.LockoutClient;
 import me.marin.lockout.lockout.goals.util.GoalDataConstants;
 import me.marin.lockout.lockout.texture.CustomTextureRenderer;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Objects;
 
 public abstract class Goal {
 
-    @Getter
     private final String id;
-    @Getter
     private final String data;
     private boolean isCompleted = false;
-    @Getter
     private LockoutTeam completedTeam;
+
+    public String getId() { return id; }
+    public String getData() { return data; }
+    public LockoutTeam getCompletedTeam() { return completedTeam; }
 
     public Goal(String id, String data) {
         this.id = id;
@@ -42,15 +42,15 @@ public abstract class Goal {
         return isCompleted;
     }
 
-    public final void render(DrawContext context, TextRenderer textRenderer, int x, int y) {
+    public final void render(GuiGraphicsExtractor context, Font textRenderer, int x, int y) {
         boolean success = false;
         if (this instanceof CustomTextureRenderer customTextureRenderer) {
             success = customTextureRenderer.renderTexture(context, x, y, LockoutClient.CURRENT_TICK);
         }
         if (!success) {
             // TODO: handle null
-            context.drawItem(this.getTextureItemStack(), x, y);
-            context.drawStackOverlay(textRenderer, this.getTextureItemStack(), x, y);
+            context.item(this.getTextureItemStack(), x, y);
+            context.itemDecorations(textRenderer, this.getTextureItemStack(), x, y);
         }
     }
 

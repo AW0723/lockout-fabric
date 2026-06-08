@@ -4,27 +4,28 @@ import me.marin.lockout.Lockout;
 import me.marin.lockout.Utility;
 import me.marin.lockout.client.LockoutClient;
 import me.marin.lockout.lockout.Goal;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.network.chat.Component;
 
-public class BoardScreen extends HandledScreen<BoardScreenHandler> {
+public class BoardScreen extends AbstractContainerScreen<BoardScreenHandler> {
 
-    public BoardScreen(BoardScreenHandler handler, PlayerInventory inventory, Text title) {
+    public BoardScreen(BoardScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title);
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         if (!Lockout.exists(LockoutClient.lockout)) {
-            this.close();
+            this.onClose();
+            Minecraft.getInstance().setScreen(null);
             return;
         }
-        this.renderBackground(context, mouseX, mouseY, delta);
-        TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+        this.extractBackground(context, mouseX, mouseY, delta);
+        Font textRenderer = Minecraft.getInstance().font;
 
         Utility.drawCenterBingoBoard(context, textRenderer, mouseX, mouseY);
         Goal hoveredGoal = Utility.getBoardHoveredGoal(context, mouseX, mouseY);
@@ -34,7 +35,7 @@ public class BoardScreen extends HandledScreen<BoardScreenHandler> {
     }
 
     @Override
-    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
+    public void extractContents(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
 
     }
 

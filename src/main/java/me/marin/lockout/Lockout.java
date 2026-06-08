@@ -1,7 +1,5 @@
 package me.marin.lockout;
 
-import lombok.Getter;
-import lombok.Setter;
 import me.marin.lockout.client.LockoutBoard;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.network.CompleteTaskPayload;
@@ -10,14 +8,14 @@ import me.marin.lockout.network.LockoutGoalsTeamsPayload;
 import me.marin.lockout.network.UpdateTimerPayload;
 import me.marin.lockout.server.LockoutServer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.server.PlayerManager;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.resources.Identifier;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,21 +48,18 @@ public class Lockout {
     public UUID mostUniqueCraftsPlayer;
     public int mostUniqueCrafts;
 
-    @Getter
     private final LockoutBoard board;
-    @Getter
     private final List<? extends LockoutTeam> teams;
     private boolean hasStarted = false;
     private boolean isRunning = true;
 
-    /**
-     * Amount of *server* ticks the game has been running for.
-     * Negative values mean that the game hasn't started yet (players are looking at the board).
-     * This value is incremented by 1 every server tick.
-     */
-    @Setter
-    @Getter
+    public LockoutBoard getBoard() { return board; }
+    public List<? extends LockoutTeam> getTeams() { return teams; }
+
     private long ticks;
+
+    public long getTicks() { return ticks; }
+    public void setTicks(long ticks) { this.ticks = ticks; }
 
     public Lockout(LockoutBoard board, List<? extends LockoutTeam> teams) {
         this.board = board;
@@ -99,8 +94,8 @@ public class Lockout {
         ticks++;
     }
 
-    public void completeGoal(Goal goal, PlayerEntity player) {
-        completeGoal(goal, player.getUuid());
+    public void completeGoal(Goal goal, Player player) {
+        completeGoal(goal, player.getUUID());
     }
     public void completeGoal(Goal goal, UUID playerId) {
         if (goal.isCompleted()) return;
@@ -124,21 +119,21 @@ public class Lockout {
         for (LockoutTeam lockoutTeam : teams) {
             if (!(lockoutTeam instanceof LockoutTeamServer lockoutTeamServer)) continue;
             if (Objects.equals(lockoutTeamServer, team)) {
-                lockoutTeamServer.sendMessage(Formatting.GREEN + message);
+                lockoutTeamServer.sendMessage(ChatFormatting.GREEN + message);
             } else {
-                lockoutTeamServer.sendMessage(Formatting.RED + message);
+                lockoutTeamServer.sendMessage(ChatFormatting.RED + message);
             }
         }
-        for (ServerPlayerEntity spectator : Utility.getSpectators(this, LockoutServer.server)) {
-            spectator.sendMessage(Text.literal(message));
+        for (ServerPlayer spectator : Utility.getSpectators(this, LockoutServer.server)) {
+            spectator.sendSystemMessage(Component.literal(message));
         }
 
         sendGoalCompletedPacket(goal, team);
         evaluateWinnerAndEndGame(team);
     }
 
-    public void complete1v1Goal(Goal goal, PlayerEntity player, boolean isWinner, String message) {
-        complete1v1Goal(goal, player.getUuid(), isWinner, message);
+    public void complete1v1Goal(Goal goal, Player player, boolean isWinner, String message) {
+        complete1v1Goal(goal, player.getUUID(), isWinner, message);
     }
     public void complete1v1Goal(Goal goal, UUID playerId, boolean isWinner, String message) {
         if (goal.isCompleted()) return;
@@ -161,10 +156,10 @@ public class Lockout {
         goal.setCompleted(true, winnerTeam);
         winnerTeam.addPoint();
 
-        winnerTeam.sendMessage(Formatting.GREEN + message);
-        loserTeam.sendMessage(Formatting.RED + message);
-        for (ServerPlayerEntity spectator : Utility.getSpectators(this, LockoutServer.server)) {
-            spectator.sendMessage(Text.literal(message));
+        winnerTeam.sendMessage(ChatFormatting.GREEN + message);
+        loserTeam.sendMessage(ChatFormatting.RED + message);
+        for (ServerPlayer spectator : Utility.getSpectators(this, LockoutServer.server)) {
+            spectator.sendSystemMessage(Component.literal(message));
         }
 
         sendGoalCompletedPacket(goal, winnerTeam);
@@ -186,7 +181,7 @@ public class Lockout {
 
         if (sendPacket) {
             var payload = new CompleteTaskPayload(goal.getId(), -1);
-            for (ServerPlayerEntity serverPlayer : LockoutServer.server.getPlayerManager().getPlayerList()) {
+            for (ServerPlayer serverPlayer : LockoutServer.server.getPlayerList().getPlayers()) {
                 ServerPlayNetworking.send(serverPlayer, payload);
             }
         }
@@ -194,17 +189,17 @@ public class Lockout {
 
     private void sendGoalCompletedPacket(Goal goal, LockoutTeam team) {
         var payload = new CompleteTaskPayload(goal.getId(), teams.indexOf(team));
-        for (ServerPlayerEntity serverPlayer : LockoutServer.server.getPlayerManager().getPlayerList()) {
+        for (ServerPlayer serverPlayer : LockoutServer.server.getPlayerList().getPlayers()) {
             ServerPlayNetworking.send(serverPlayer, payload);
         }
     }
 
     private void evaluateWinnerAndEndGame(LockoutTeam team) {
-        PlayerManager playerManager = LockoutServer.server.getPlayerManager();
+        PlayerList playerManager = LockoutServer.server.getPlayerList();
 
         List<LockoutTeam> winners = new ArrayList<>();
         if (isWinner(team)) {
-            playerManager.broadcast(Text.literal(team.getDisplayName() + " wins."), false);
+            playerManager.broadcastSystemMessage(Component.literal(team.getDisplayName() + " wins."), false);
             winners.add(team);
             setRunning(false);
         } else {
@@ -212,14 +207,14 @@ public class Lockout {
                 int maxCompleted = teams.stream().max(Comparator.comparingInt(LockoutTeam::getPoints)).get().getPoints();
                 List<? extends LockoutTeam> winnerTeams = teams.stream().filter(t -> t.getPoints() == maxCompleted).toList();
                 winners.addAll(winnerTeams);
-                playerManager.broadcast(Text.literal("It's a tie! " + getWinnerTeamsString(winnerTeams) + " win."), false);
+                playerManager.broadcastSystemMessage(Component.literal("It's a tie! " + getWinnerTeamsString(winnerTeams) + " win."), false);
                 setRunning(false);
             }
         }
 
         if (!this.isRunning) {
             var payload = new EndLockoutPayload(winners.stream().mapToInt(winner -> teams.indexOf(winner)).toArray(), System.currentTimeMillis());
-            for (ServerPlayerEntity serverPlayer : LockoutServer.server.getPlayerManager().getPlayerList()) {
+            for (ServerPlayer serverPlayer : LockoutServer.server.getPlayerList().getPlayers()) {
                 ServerPlayNetworking.send(serverPlayer, payload);
             }
         }
@@ -237,8 +232,8 @@ public class Lockout {
         this.hasStarted = hasStarted;
     }
 
-    public boolean isLockoutPlayer(PlayerEntity player) {
-        return isLockoutPlayer(player.getUuid());
+    public boolean isLockoutPlayer(Player player) {
+        return isLockoutPlayer(player.getUUID());
     }
     public boolean isLockoutPlayer(UUID playerId) {
         for (LockoutTeam team : teams) {
