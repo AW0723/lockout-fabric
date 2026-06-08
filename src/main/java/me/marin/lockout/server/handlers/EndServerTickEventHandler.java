@@ -10,9 +10,13 @@ import me.marin.lockout.lockout.goals.misc.ReachBedrockGoal;
 import me.marin.lockout.lockout.goals.misc.ReachHeightLimitGoal;
 import me.marin.lockout.lockout.goals.misc.ReachNetherRoofGoal;
 import me.marin.lockout.lockout.goals.opponent.OpponentTouchesWaterGoal;
+import me.marin.lockout.lockout.goals.misc.FillBundleWithBundlesGoal;
 import me.marin.lockout.lockout.interfaces.ObtainItemsGoal;
 import me.marin.lockout.lockout.interfaces.OpponentObtainsItemGoal;
 import me.marin.lockout.lockout.interfaces.RideEntityGoal;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.BundleItem;
+import net.minecraft.world.item.component.BundleContents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.world.level.block.Blocks;
@@ -63,6 +67,22 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
                             lockout.complete1v1Goal(goal, player, false, opponentObtainsItemGoal.getMessage(player));
                         } else {
                             lockout.completeGoal(goal, player);
+                        }
+                    }
+                }
+
+                if (goal instanceof FillBundleWithBundlesGoal && lockout.getTicks() % 20 == 0) {
+                    if (lockout.isLockoutPlayer(player.getUUID())) {
+                        outer:
+                        for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
+                            if (!(stack.getItem() instanceof BundleItem)) continue;
+                            BundleContents bcc = stack.get(DataComponents.BUNDLE_CONTENTS);
+                            if (bcc == null) continue;
+                            long bundleCount = bcc.itemCopyStream().filter(s -> s.getItem() instanceof BundleItem).count();
+                            if (bundleCount >= 16) {
+                                lockout.completeGoal(goal, player);
+                                break outer;
+                            }
                         }
                     }
                 }
